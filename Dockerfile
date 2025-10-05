@@ -118,7 +118,9 @@ ENV WINEPREFIX=/home/gamer/.wine64
 
 # Set up gamer user home directory and permissions
 RUN chown -R gamer:gamer /home/gamer && \
-    chown -R gamer:gamer /mnt/shared
+    chown -R gamer:gamer /mnt/shared && \
+    mkdir -p /home/gamer/.wine64 && \
+    chown -R gamer:gamer /home/gamer/.wine64
 
 WORKDIR /home/gamer
 USER gamer
