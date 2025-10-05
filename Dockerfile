@@ -100,6 +100,10 @@ RUN chmod +x /usr/local/bin/setup-gfxstream.sh
 COPY launch-game.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/launch-game.sh
 
+# Create gamer user with UID 1000
+RUN useradd -m -s /bin/bash -u 1000 gamer && \
+    usermod -aG audio,video gamer
+
 # Create mount point for shared directory
 RUN mkdir -p /mnt/shared
 
@@ -110,7 +114,14 @@ ENV MESA_VK_WSI_DEBUG=sw,linear
 ENV XWAYLAND_NO_GLAMOR=1
 ENV LIBGL_KOPPER_DRI2=1
 ENV DISPLAY=:0
+ENV WINEPREFIX=/home/gamer/.wine64
+ENV WINEARCH=win64
 
-WORKDIR /root
+# Set up gamer user home directory and permissions
+RUN chown -R gamer:gamer /home/gamer && \
+    chown -R gamer:gamer /mnt/shared
+
+WORKDIR /home/gamer
+USER gamer
 ENTRYPOINT ["bash", "-c"]
 CMD ["bash"]
