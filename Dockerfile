@@ -41,13 +41,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     xvfb \
     unzip \
     tar \
+    xz-utils \
     mesa-vulkan-drivers \
     vulkan-tools \
     libvulkan1 \
     libvulkan-dev \
     mesa-utils \
-    glxinfo \
-    vulkan-utils \
+    mesa-utils-extra \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -71,22 +71,22 @@ RUN mkdir -p /usr/share/vulkan/icd.d
 COPY gfxstream_vk_icd.json /usr/share/vulkan/icd.d/
 
 # Install DXVK-Sarek for Vulkan 1.1.305 compatibility
-COPY dxvk-sarek-v1.11.0.tar.gz /tmp/
-RUN cd /tmp && tar -xzf dxvk-sarek-v1.11.0.tar.gz \
+RUN cd /tmp && wget -O dxvk-sarek-v1.11.0.tar.gz "https://github.com/pythonlover02/DXVK-Sarek/releases/download/v1.11.0/dxvk-sarek-async-v1.11.0.tar.gz" \
+ && tar -xzf dxvk-sarek-v1.11.0.tar.gz \
  && mkdir -p /opt/dxvk-sarek \
  && cp -r dxvk-sarek-async-v1.11.0/* /opt/dxvk-sarek/ \
  && rm -rf /tmp/dxvk-sarek-async-v1.11.0 /tmp/dxvk-sarek-v1.11.0.tar.gz
 
 # Install XinputBridge winefiles
-COPY winefiles-1.35.zip /tmp/
-RUN cd /tmp && unzip winefiles-1.35.zip \
+RUN cd /tmp && wget -O winefiles-1.35.zip "https://github.com/Ilan12346-maya/XinputBridge/releases/download/1.35/winefiles_1.35.zip" \
+ && unzip winefiles-1.35.zip \
  && mkdir -p /opt/xinput-bridge \
  && cp -r winefiles/* /opt/xinput-bridge/ \
  && rm -rf /tmp/winefiles /tmp/winefiles-1.35.zip
 
 # Install UDP proxy for XinputBridge
-COPY udp-proxy-1.0.1.zip /tmp/
-RUN cd /tmp && unzip udp-proxy-1.0.1.zip \
+RUN cd /tmp && wget -O udp-proxy-1.0.1.zip "https://github.com/nanofuxion/XinputBridge/releases/download/v1.0.1/udp-proxy-package.zip" \
+ && unzip udp-proxy-1.0.1.zip \
  && mkdir -p /opt/udp-proxy \
  && cp -r arm64/* /opt/udp-proxy/ \
  && chmod +x /opt/udp-proxy/udp_proxy \
