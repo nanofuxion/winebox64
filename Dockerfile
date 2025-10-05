@@ -106,8 +106,10 @@ RUN chmod +x /usr/local/bin/setup-gfxstream.sh
 COPY launch-game.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/launch-game.sh
 
-# Create gamer user with UID 1000 and add to required groups
-RUN useradd -m -s /bin/bash -u 1000 gamer && \
+# Create required groups and gamer user
+RUN groupadd -r render && \
+    groupadd -r input && \
+    useradd -m -s /bin/bash -u 1000 gamer && \
     usermod -aG audio,video,render,input gamer
 
 # Create mount point for shared directory
