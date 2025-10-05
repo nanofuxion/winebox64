@@ -5,7 +5,7 @@ services:
     stdin_open: true
     tty: true
     volumes:
-      - ./shared:/mnt/shared:ro  # Mount shared directory as read-only
+      - /mnt/shared:/mnt/shared:rw  # Mount shared directory as read-only
       - wine_prefix:/root/.wine64   # Persist Wine prefix
     environment:
       - MESA_LOADER_DRIVER_OVERRIDE=zink
