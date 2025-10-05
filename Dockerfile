@@ -115,7 +115,6 @@ ENV XWAYLAND_NO_GLAMOR=1
 ENV LIBGL_KOPPER_DRI2=1
 ENV DISPLAY=:0
 ENV WINEPREFIX=/home/gamer/.wine64
-ENV WINEARCH=win64
 
 # Set up gamer user home directory and permissions
 RUN chown -R gamer:gamer /home/gamer && \
