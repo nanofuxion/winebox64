@@ -5,19 +5,25 @@ services:
     stdin_open: true
     tty: true
     user: "1000:1000"  # Use gamer user (UID 1000)
+    # Use host IPC for shared memory (/dev/shm), which is simpler and more reliable
+    ipc: host
     volumes:
-        - /mnt/shared:/mnt/shared:rw  # Mount shared directory
-        - wine_prefix:/home/gamer/.wine64   # Persist Wine prefix
+        - /mnt/shared:/mnt/shared:rw
+        - wine_prefix:/home/gamer/.wine64
+        - /tmp/.X11-unix:/tmp/.X11-unix:rw
+        - /usr/lib/aarch64-linux-gnu/libvulkan_gfxstream.so:/usr/lib/aarch64-linux-gnu/libvulkan_gfxstream.so:ro
     environment:
       - MESA_LOADER_DRIVER_OVERRIDE=zink
       - VK_ICD_FILENAMES=/usr/share/vulkan/icd.d/gfxstream_vk_icd.json
       - MESA_VK_WSI_DEBUG=sw,linear
       - XWAYLAND_NO_GLAMOR=1
       - LIBGL_KOPPER_DRI2=1
-      - DISPLAY=:0
+      - DISPLAY=${DISPLAY:-:0}
+      - XAUTHORITY=/tmp/.X11-unix
     devices:
-      - /dev/dri:/dev/dri  # GPU access for Vulkan
-    privileged: true  # Required for some gaming features
+      - /dev/dri:/dev/dri    # GPU access for graphics
+      - /dev/snd:/dev/snd    # Sound card access for audio 🔊
+      - /dev/input:/dev/input # Keyboard/mouse access for interaction ⌨️
     command: ["bash"]
 
 volumes:

@@ -5,7 +5,9 @@ ENV DEBIAN_FRONTEND="noninteractive"
 # Install libraries needed to compile box
 RUN dpkg --add-architecture armhf \
  && apt-get update \
- && apt-get install -y --no-install-recommends --no-install-suggests git wget curl cmake python3 build-essential gcc-arm-linux-gnueabihf libc6-dev-armhf-cross libc6:armhf libstdc++6:armhf ca-certificates 
+ && apt-get install -y --no-install-recommends --no-install-suggests git wget curl cmake python3 build-essential gcc-arm-linux-gnueabihf libc6-dev-armhf-cross libc6:armhf libstdc++6:armhf ca-certificates \
+ && apt-get install -y libasound2-plugins:armhf libasound2:armhf libc6:armhf libcapi20-3:armhf libcups2:armhf libdbus-1-3:armhf libfontconfig1:armhf libfreetype6:armhf libglib2.0-0:armhf libglu1-mesa:armhf libgnutls30:armhf libgphoto2-6:armhf libgphoto2-port12:armhf libgsm1:armhf libgssapi-krb5-2:armhf libgstreamer-plugins-base1.0-0:armhf libgstreamer1.0-0:armhf libjpeg62-turbo:armhf libkrb5-3:armhf libncurses6:armhf libodbc1:armhf libosmesa6:armhf libpcap0.8:armhf libpng16-16:armhf libpulse0:armhf libsane1:armhf libsdl2-2.0-0:armhf libtiff6:armhf libudev1:armhf libunwind8:armhf libusb-1.0-0:armhf libv4l-0:armhf libx11-6:armhf libxcomposite1:armhf libxcursor1:armhf libxext6:armhf libxfixes3:armhf libxi6:armhf libxinerama1:armhf libxrandr2:armhf libxrender1:armhf libxslt1.1:armhf libxxf86vm1:armhf ocl-icd-libopencl1:armhf \ 
+ && apt-get install -y libasound2-plugins:arm64 libasound2:arm64 libc6:arm64 libcapi20-3:arm64 libcups2:arm64 libdbus-1-3:arm64 libfontconfig1:arm64 libfreetype6:arm64 libglib2.0-0:arm64 libglu1-mesa:arm64 libgnutls30:arm64 libgphoto2-6:arm64 libgphoto2-port12:arm64 libgsm1:arm64 libgssapi-krb5-2:arm64 libgstreamer-plugins-base1.0-0:arm64 libgstreamer1.0-0:arm64 libjpeg62-turbo:arm64 libkrb5-3:arm64 libncurses6:arm64 libodbc1:arm64 libosmesa6:arm64 libpcap0.8:arm64 libpng16-16:arm64 libpulse0:arm64 libsane1:arm64 libsdl2-2.0-0:arm64 libtiff6:arm64 libudev1:arm64 libusb-1.0-0:arm64 libv4l-0:arm64 libx11-6:arm64 libxcomposite1:arm64 libxcursor1:arm64 libxext6:arm64 libxfixes3:arm64 libxi6:arm64 libxinerama1:arm64 libxrandr2:arm64 libxrender1:arm64 libxslt1.1:arm64 libxxf86vm1:arm64 ocl-icd-libopencl1:arm64 
 
 WORKDIR /root
 
@@ -70,6 +72,10 @@ RUN bash /wrap-wine.sh \
 RUN mkdir -p /usr/share/vulkan/icd.d
 COPY gfxstream_vk_icd.json /usr/share/vulkan/icd.d/
 
+# Download gfxstream Vulkan library (will be available on Linux target)
+RUN mkdir -p /usr/lib/aarch64-linux-gnu/ && \
+    echo "Note: libvulkan_gfxstream.so should be available on the Linux target system at /usr/lib/aarch64-linux-gnu/libvulkan_gfxstream.so"
+
 # Install DXVK-Sarek for Vulkan 1.1.305 compatibility
 RUN cd /tmp && wget -O dxvk-sarek-v1.11.0.tar.gz "https://github.com/pythonlover02/DXVK-Sarek/releases/download/v1.11.0/dxvk-sarek-async-v1.11.0.tar.gz" \
  && tar -xzf dxvk-sarek-v1.11.0.tar.gz \
@@ -100,9 +106,9 @@ RUN chmod +x /usr/local/bin/setup-gfxstream.sh
 COPY launch-game.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/launch-game.sh
 
-# Create gamer user with UID 1000
+# Create gamer user with UID 1000 and add to required groups
 RUN useradd -m -s /bin/bash -u 1000 gamer && \
-    usermod -aG audio,video gamer
+    usermod -aG audio,video,render,input gamer
 
 # Create mount point for shared directory
 RUN mkdir -p /mnt/shared
