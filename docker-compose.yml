@@ -6,7 +6,7 @@ services:
     tty: true
     user: "1000:1000"  # Use gamer user (UID 1000)
     volumes:
-        - ./shared:/mnt/shared:rw  # Mount shared directory
+        - /mnt/shared:/mnt/shared:rw  # Mount shared directory
         - wine_prefix:/home/gamer/.wine64   # Persist Wine prefix
     environment:
       - MESA_LOADER_DRIVER_OVERRIDE=zink
