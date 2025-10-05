@@ -1,6 +1,24 @@
 version: '3.9'
 services:
-  boxwine:
+  winebox64-gaming:
     build: .
+    container_name: winebox64-gaming
     stdin_open: true
     tty: true
+    volumes:
+      - /mnt/shared:/mnt/shared:ro  # Mount shared directory as read-only
+      - wine_prefix:/root/.wine64   # Persist Wine prefix
+    environment:
+      - MESA_LOADER_DRIVER_OVERRIDE=zink
+      - VK_ICD_FILENAMES=/usr/share/vulkan/icd.d/gfxstream_vk_icd.json
+      - MESA_VK_WSI_DEBUG=sw,linear
+      - XWAYLAND_NO_GLAMOR=1
+      - LIBGL_KOPPER_DRI2=1
+      - DISPLAY=:0
+    devices:
+      - /dev/dri:/dev/dri  # GPU access for Vulkan
+    privileged: true  # Required for some gaming features
+    command: ["bash"]
+
+volumes:
+  wine_prefix:

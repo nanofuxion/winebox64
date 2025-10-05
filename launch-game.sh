@@ -1,0 +1,94 @@
+#!/bin/bash
+set -euo pipefail
+
+# Game launcher script for Wine with gfxstream support
+# Usage: launch-game.sh [game_executable] [additional_args...]
+
+if [ $# -eq 0 ]; then
+    echo "Usage: $0 <game_executable> [additional_args...]"
+    echo "Example: $0 /mnt/shared/games/MyGame.exe"
+    exit 1
+fi
+
+GAME_EXECUTABLE="$1"
+shift
+GAME_ARGS="$@"
+
+echo "Starting game: $GAME_EXECUTABLE"
+echo "Arguments: $GAME_ARGS"
+
+# Setup gfxstream environment
+source /usr/local/bin/setup-gfxstream.sh
+
+# Initialize Wine prefix if it doesn't exist
+if [ ! -d "$HOME/.wine64" ]; then
+    echo "Initializing Wine prefix..."
+    wine64 wineboot --init
+    wine wineboot --init
+fi
+
+# Install DXVK-Sarek to Wine prefix
+echo "Installing DXVK-Sarek..."
+if [ -d "/opt/dxvk-sarek" ]; then
+    # Install 64-bit DXVK files
+    if [ -d "/opt/dxvk-sarek/x64" ]; then
+        cp /opt/dxvk-sarek/x64/*.dll "$HOME/.wine64/drive_c/windows/system32/"
+        echo "Installed 64-bit DXVK-Sarek files"
+    fi
+    
+    # Install 32-bit DXVK files
+    if [ -d "/opt/dxvk-sarek/x32" ]; then
+        cp /opt/dxvk-sarek/x32/*.dll "$HOME/.wine64/drive_c/windows/syswow64/"
+        echo "Installed 32-bit DXVK-Sarek files"
+    fi
+else
+    echo "Warning: DXVK-Sarek not found at /opt/dxvk-sarek"
+fi
+
+# Install XinputBridge to Wine prefix
+echo "Installing XinputBridge..."
+if [ -d "/opt/xinput-bridge" ]; then
+    # Install 64-bit XinputBridge files
+    if [ -d "/opt/xinput-bridge/64" ]; then
+        cp /opt/xinput-bridge/64/*.dll "$HOME/.wine64/drive_c/windows/system32/"
+        echo "Installed 64-bit XinputBridge files"
+    fi
+    
+    # Install 32-bit XinputBridge files
+    if [ -d "/opt/xinput-bridge/32" ]; then
+        cp /opt/xinput-bridge/32/*.dll "$HOME/.wine64/drive_c/windows/syswow64/"
+        echo "Installed 32-bit XinputBridge files"
+    fi
+else
+    echo "Warning: XinputBridge not found at /opt/xinput-bridge"
+fi
+
+# Start UDP proxy for XinputBridge if available
+if [ -f "/opt/udp-proxy/udp_proxy" ]; then
+    echo "Starting UDP proxy for XinputBridge..."
+    /opt/udp-proxy/udp_proxy &
+    UDP_PROXY_PID=$!
+    echo "UDP proxy started with PID: $UDP_PROXY_PID"
+fi
+
+# Set Wine environment variables for better gaming performance
+export WINEDEBUG=-all
+export WINEDLLOVERRIDES="dinput8=n;dinput=n;xinput1_3=n;xinput1_4=n;xinput9_1_0=n"
+
+# Launch the game
+echo "Launching game with Wine..."
+if [[ "$GAME_EXECUTABLE" == *.exe ]]; then
+    # Use wine64 for .exe files
+    wine64 "$GAME_EXECUTABLE" $GAME_ARGS
+else
+    # Use wine for other files
+    wine "$GAME_EXECUTABLE" $GAME_ARGS
+fi
+
+# Clean up UDP proxy if it was started
+if [ ! -z "${UDP_PROXY_PID:-}" ]; then
+    echo "Stopping UDP proxy..."
+    kill $UDP_PROXY_PID 2>/dev/null || true
+fi
+
+echo "Game session ended."
