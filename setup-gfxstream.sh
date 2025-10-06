@@ -5,7 +5,7 @@ set -euo pipefail
 echo "Setting up gfxstream environment..."
 
 # Create weston environment file
-cat << EOF > /home/droid/weston.env
+cat << EOF > /home/gamer/weston.env
 MESA_LOADER_DRIVER_OVERRIDE=zink
 VK_ICD_FILENAMES=/usr/share/vulkan/icd.d/gfxstream_vk_icd.json
 MESA_VK_WSI_DEBUG=sw,linear
