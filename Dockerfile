@@ -1,4 +1,4 @@
-FROM debian:debian:trixie-slim as build
+FROM debian:trixie-slim as build
 
 ENV DEBIAN_FRONTEND="noninteractive"
 
@@ -8,9 +8,9 @@ RUN dpkg --add-architecture armhf \
  && apt-get install -y --no-install-recommends --no-install-suggests \
     sudo git wget curl cmake python3 build-essential gcc-arm-linux-gnueabihf libc6-dev-armhf-cross libc6:armhf libstdc++6:armhf ca-certificates \
  && apt-get install -y --no-install-recommends \
-    libasound2-plugins:armhf libasound2:armhf libc6:armhf libcapi20-3:armhf libcups2:armhf libdbus-1-3:armhf libfontconfig1:armhf libfreetype6:armhf libglib2.0-0:armhf libglu1-mesa:armhf libgnutls30:armhf libgphoto2-6:armhf libgphoto2-port12:armhf libgsm1:armhf libgssapi-krb5-2:armhf libgstreamer-plugins-base1.0-0:armhf libgstreamer1.0-0:armhf libjpeg62-turbo:armhf libkrb5-3:armhf libncurses6:armhf libodbc1:armhf libosmesa6:armhf libpcap0.8:armhf libpng16-16:armhf libpulse0:armhf libsane1:armhf libsdl2-2.0-0:armhf libtiff6:armhf libudev1:armhf libunwind8:armhf libusb-1.0-0:armhf libv4l-0:armhf libx11-6:armhf libxcomposite1:armhf libxcursor1:armhf libxext6:armhf libxfixes3:armhf libxi6:armhf libxinerama1:armhf libxrandr2:armhf libxrender1:armhf libxslt1.1:armhf libxxf86vm1:armhf ocl-icd-libopencl1:armhf \
+    libasound2-plugins:armhf libasound2t64:armhf libc6:armhf libcups2t64:armhf libdbus-1-3:armhf libfontconfig1:armhf libfreetype6:armhf libglib2.0-0t64:armhf libglu1-mesa:armhf libgnutls30t64:armhf libgsm1:armhf libgssapi-krb5-2:armhf libgstreamer-plugins-base1.0-0:armhf libgstreamer1.0-0:armhf libjpeg62-turbo:armhf libkrb5-3:armhf libncurses6:armhf libosmesa6:armhf libpcap0.8:armhf libpng16-16t64:armhf libpulse0:armhf libsane1:armhf libsdl2-2.0-0:armhf libtiff6:armhf libudev1:armhf libunwind8:armhf libusb-1.0-0:armhf libx11-6:armhf libxcomposite1:armhf libxcursor1:armhf libxext6:armhf libxfixes3:armhf libxi6:armhf libxinerama1:armhf libxrandr2:armhf libxrender1:armhf libxslt1.1:armhf libxxf86vm1:armhf ocl-icd-libopencl1:armhf \
  && apt-get install -y --no-install-recommends \
-    libasound2-plugins:arm64 libasound2:arm64 libc6:arm64 libcapi20-3:arm64 libcups2:arm64 libdbus-1-3:arm64 libfontconfig1:arm64 libfreetype6:arm64 libglib2.0-0:arm64 libglu1-mesa:arm64 libgnutls30:arm64 libgphoto2-6:arm64 libgphoto2-port12:arm64 libgsm1:arm64 libgssapi-krb5-2:arm64 libgstreamer-plugins-base1.0-0:arm64 libgstreamer1.0-0:arm64 libjpeg62-turbo:arm64 libkrb5-3:arm64 libncurses6:arm64 libodbc1:arm64 libosmesa6:arm64 libpcap0.8:arm64 libpng16-16:arm64 libpulse0:arm64 libsane1:arm64 libsdl2-2.0-0:arm64 libtiff6:arm64 libudev1:arm64 libusb-1.0-0:arm64 libv4l-0:arm64 libx11-6:arm64 libxcomposite1:arm64 libxcursor1:arm64 libxext6:arm64 libxfixes3:arm64 libxi6:arm64 libxinerama1:arm64 libxrandr2:arm64 libxrender1:arm64 libxslt1.1:arm64 libxxf86vm1:arm64 ocl-icd-libopencl1:arm64 
+    libasound2-plugins:arm64 libasound2t64:arm64 libc6:arm64 libcups2t64:arm64 libdbus-1-3:arm64 libfontconfig1:arm64 libfreetype6:arm64 libglib2.0-0t64:arm64 libglu1-mesa:arm64 libgnutls30t64:arm64 libgsm1:arm64 libgssapi-krb5-2:arm64 libgstreamer-plugins-base1.0-0:arm64 libgstreamer1.0-0:arm64 libjpeg62-turbo:arm64 libkrb5-3:arm64 libncurses6:arm64 libosmesa6:arm64 libpcap0.8:arm64 libpng16-16t64:arm64 libpulse0:arm64 libsane1:arm64 libsdl2-2.0-0:arm64 libtiff6:arm64 libudev1:arm64 libusb-1.0-0:arm64 libx11-6:arm64 libxcomposite1:arm64 libxcursor1:arm64 libxext6:arm64 libxfixes3:arm64 libxi6:arm64 libxinerama1:arm64 libxrandr2:arm64 libxrender1:arm64 libxslt1.1:arm64 libxxf86vm1:arm64 ocl-icd-libopencl1:arm64 
 
 WORKDIR /root
 
@@ -22,7 +22,7 @@ RUN git clone https://github.com/ptitSeb/box64 \
  && make -j$(nproc) \
  && make install DESTDIR=/box
 
-FROM debian:debian:trixie-slim
+FROM debian:trixie-slim
 
 # Copy compiled box86 and box64 binaries
 COPY --from=build /box /
@@ -39,18 +39,15 @@ RUN dpkg --add-architecture i386 \
  && apt-get install -y --no-install-recommends \
     # 64-bit (amd64) libraries for Wine
     libasound2-plugins \
-    libasound2 \
+    libasound2t64 \
     libc6 \
-    libcapi20-3 \
-    libcups2 \
+    libcups2t64 \
     libdbus-1-3 \
     libfontconfig1 \
     libfreetype6 \
-    libglib2.0-0 \
+    libglib2.0-0t64 \
     libglu1-mesa \
-    libgnutls30 \
-    libgphoto2-6 \
-    libgphoto2-port12 \
+    libgnutls30t64 \
     libgsm1 \
     libgssapi-krb5-2 \
     libgstreamer-plugins-base1.0-0 \
@@ -61,14 +58,13 @@ RUN dpkg --add-architecture i386 \
     libodbc2 \
     libosmesa6 \
     libpcap0.8 \
-    libpng16-16 \
+    libpng16-16t64 \
     libpulse0 \
     libsane1 \
     libsdl2-2.0-0 \
     libtiff6 \
     libudev1 \
     libusb-1.0-0 \
-    libv4l-0 \
     libx11-6 \
     libxcomposite1 \
     libxcursor1 \
@@ -83,18 +79,15 @@ RUN dpkg --add-architecture i386 \
     ocl-icd-libopencl1 \
     # 32-bit (i386) libraries for WoW64
     libasound2-plugins:i386 \
-    libasound2:i386 \
+    libasound2t64:i386 \
     libc6:i386 \
-    libcapi20-3:i386 \
-    libcups2:i386 \
+    libcups2t64:i386 \
     libdbus-1-3:i386 \
     libfontconfig1:i386 \
     libfreetype6:i386 \
-    libglib2.0-0:i386 \
+    libglib2.0-0t64:i386 \
     libglu1-mesa:i386 \
-    libgnutls30:i386 \
-    libgphoto2-6:i386 \
-    libgphoto2-port12:i386 \
+    libgnutls30t64:i386 \
     libgsm1:i386 \
     libgssapi-krb5-2:i386 \
     libgstreamer-plugins-base1.0-0:i386 \
@@ -105,14 +98,13 @@ RUN dpkg --add-architecture i386 \
     libodbc2:i386 \
     libosmesa6:i386 \
     libpcap0.8:i386 \
-    libpng16-16:i386 \
+    libpng16-16t64:i386 \
     libpulse0:i386 \
     libsane1:i386 \
     libsdl2-2.0-0:i386 \
     libtiff6:i386 \
     libudev1:i386 \
     libusb-1.0-0:i386 \
-    libv4l-0:i386 \
     libx11-6:i386 \
     libxcomposite1:i386 \
     libxcursor1:i386 \
