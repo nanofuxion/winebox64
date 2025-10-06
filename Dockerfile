@@ -138,8 +138,8 @@ RUN apt-get update \
  && rm -rf /var/lib/apt/lists/*
 
 # Create required groups and gamer user early
-RUN groupadd -r render \
- && groupadd -r input \
+RUN getent group render >/dev/null 2>&1 || groupadd -r render \
+ && getent group input >/dev/null 2>&1 || groupadd -r input \
  && useradd -m -s /bin/bash -u 1000 gamer \
  && usermod -aG audio,video,render,input gamer
 
