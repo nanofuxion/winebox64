@@ -11,7 +11,7 @@ wget -O wine-10.0-amd64-wow64.tar.xz "https://github.com/Kron4ek/Wine-Builds/rel
 echo -e "Extracting wine . . ."
 tar -xf wine-10.0-amd64-wow64.tar.xz
 echo -e "Installing wine . . ."
-mv wine-10.0-amd64-wow64 /opt/wine
+sudo mv wine-10.0-amd64-wow64 /opt/wine
 
 # Clean up
 rm -f wine-10.0-amd64-wow64.tar.xz
@@ -19,9 +19,9 @@ rm -f wine-10.0-amd64-wow64.tar.xz
 # Install winetricks
 wget https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks
 chmod +x winetricks
-mv winetricks /usr/local/bin/
+sudo mv winetricks /usr/local/bin/
 
 # Clean up
-apt-get -y autoremove 
-apt-get clean autoclean 
-rm -rf /tmp/* /var/tmp/* /var/lib/apt/lists
+sudo apt-get -y autoremove
+sudo apt-get clean autoclean
+sudo rm -rf /tmp/* /var/tmp/* /var/lib/apt/lists

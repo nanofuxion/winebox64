@@ -31,7 +31,7 @@ COPY --from=build /box /
 RUN dpkg --add-architecture armhf \
  && apt-get update \
  && apt-get install --yes --no-install-recommends \
-    wget curl libc6:armhf libstdc++6:armhf ca-certificates
+    wget curl libc6:armhf libstdc++6:armhf ca-certificates sudo
 
 # Install the correct i386 architecture for WoW64 support and all required Wine dependencies
 RUN dpkg --add-architecture i386 \
@@ -141,7 +141,8 @@ RUN apt-get update \
 RUN getent group render >/dev/null 2>&1 || groupadd -r render \
  && getent group input >/dev/null 2>&1 || groupadd -r input \
  && useradd -m -s /bin/bash -u 1000 gamer \
- && usermod -aG audio,video,render,input gamer
+ && usermod -aG audio,video,render,input,sudo gamer \
+ && echo 'gamer ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
 # Clean up
 RUN apt-get -y autoremove \
@@ -167,6 +168,10 @@ RUN chmod +x /usr/local/bin/setup-gfxstream.sh
 COPY launch-game /usr/local/bin/
 RUN chmod +x /usr/local/bin/launch-game
 
+# Create opt directory and set proper permissions for gamer user
+RUN mkdir -p /opt \
+ && chown -R gamer:gamer /opt
+
 # Switch to gamer user for Wine and game-related installations
 USER gamer
 WORKDIR /home/gamer
@@ -174,19 +179,24 @@ WORKDIR /home/gamer
 # Install Wine 10.0 with WOW64 support as gamer user
 COPY install-wine.sh /tmp/
 RUN bash /tmp/install-wine.sh \
- && rm /tmp/install-wine.sh
+ && sudo rm -f /tmp/install-wine.sh
 
-# Install box wrapper for wine as gamer user
-COPY wrap-wine.sh /tmp/
-RUN bash /tmp/wrap-wine.sh \
- && rm /tmp/wrap-wine.sh
-
-# Install DXVK-Sarek for Vulkan 1.1.305 compatibility as gamer user
-RUN cd /tmp && wget -O dxvk-sarek-v1.11.0.tar.gz "https://github.com/pythonlover02/DXVK-Sarek/releases/download/v1.11.0/dxvk-sarek-async-v1.11.0.tar.gz" \
+# Install wine preparation script as gamer user
+COPY wine-prep.sh /tmp/
+USER gamer
+RUN bash /tmp/wine-prep.sh \
+ && cd /tmp && wget -O dxvk-sarek-v1.11.0.tar.gz "https://github.com/pythonlover02/DXVK-Sarek/releases/download/v1.11.0/dxvk-sarek-async-v1.11.0.tar.gz" \
  && tar -xzf dxvk-sarek-v1.11.0.tar.gz \
  && mkdir -p /opt/dxvk-sarek \
- && cp -r dxvk-sarek-async-v1.11.0/* /opt/dxvk-sarek/ \
+ && cd dxvk-sarek-async-v1.11.0 \
+ && mkdir -p /home/gamer/.wine64/drive_c/windows/system32 \
+ && mkdir -p /home/gamer/.wine64/drive_c/windows/syswow64 \
+ && mkdir -p /home/gamer/.wine/drive_c/windows/system32 \
+ && cp x32/* /home/gamer/.wine64/drive_c/windows/system32/ \
+ && cp x64/* /home/gamer/.wine64/drive_c/windows/syswow64/ \
  && rm -rf /tmp/dxvk-sarek-async-v1.11.0 /tmp/dxvk-sarek-v1.11.0.tar.gz
+USER root
+RUN rm -f /tmp/wine-prep.sh
 
 # Install XinputBridge winefiles as gamer user
 RUN cd /tmp && wget -O winefiles-1.35.zip "https://github.com/Ilan12346-maya/XinputBridge/releases/download/1.35/winefiles_1.35.zip" \
@@ -218,9 +228,7 @@ ENV WINEPREFIX=/home/gamer/.wine64
 
 # Set up final permissions and switch to gamer user
 RUN chown -R gamer:gamer /home/gamer \
- && chown -R gamer:gamer /mnt/shared \
- && mkdir -p /home/gamer/.wine64 \
- && chown -R gamer:gamer /home/gamer/.wine64
+ && chown -R gamer:gamer /mnt/shared
 
 USER gamer
 WORKDIR /home/gamer

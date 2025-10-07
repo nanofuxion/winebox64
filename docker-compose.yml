@@ -9,6 +9,8 @@ services:
     # Share the host's process ID namespace, helps with some drivers
     pid: "host"
     ipc: "host"
+    # Use host networking to share network and network devices
+    network_mode: "host"
     volumes:
         - /mnt/shared:/mnt/shared:rw
         - wine_prefix:/home/gamer/.wine64
