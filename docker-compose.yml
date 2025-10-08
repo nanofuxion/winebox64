@@ -4,18 +4,20 @@ services:
     container_name: winebox64-gaming
     stdin_open: true
     tty: true
-    # Add privileged mode to remove kernel-level restrictions
+    # Privileged mode is required for the container to modify its own iptables rules.
     privileged: true
     # Share the host's process ID namespace, helps with some drivers
     pid: "host"
     ipc: "host"
     # Use host networking to share network and network devices
     network_mode: "host"
+    
     volumes:
         - /mnt/shared:/mnt/shared:rw
         - wine_prefix:/home/gamer/.wine64
         - /tmp/.X11-unix:/tmp/.X11-unix:rw
-        - /usr/lib/aarch64-linux-gnu/libvulkan_gfxstream.so:/usr/lib/aarch64-linux-gnu/libvulkan_gfxstream.so:ro
+        - /usr/lib/aarch64-linux-gnu/libvulkan_gfxstream.so:/usr/lib/aarch64-linux-gnu/libvulkan_gfxstream.so:ro # Vulkan gfxstream
+        - /usr/lib/aarch64-linux-gnu/libGL.so.1:/usr/lib/aarch64-linux-gnu/libGL.so.1:ro # OpenGL Zink
         - /dev:/dev:rw
     environment:
       - MESA_LOADER_DRIVER_OVERRIDE=zink
@@ -25,7 +27,21 @@ services:
       - LIBGL_KOPPER_DRI2=1
       - DISPLAY=${DISPLAY:-:0}
       - XAUTHORITY=/tmp/.X11-unix
-    command: ["bash"]
+      
+    # This command first finds the neighbor's IP, adds a network rule to redirect the hardcoded IP, then starts the shell.
+    # It redirects UDP traffic intended for 127.0.0.1 on port 7947 to your neighbor's IP.
+    command: >
+      /bin/bash -c "
+      export NEIGHBOR_IP=\$$(ip neigh show | grep -E 'dev|avf_tap_fixed' | awk '{print \$$1}' | head -n 1);
+      if [ -n \"\$$NEIGHBOR_IP\" ]; then
+        echo \"Found neighbor IP: \$$NEIGHBOR_IP. Applying redirect.\";
+        iptables -t nat -A OUTPUT -p udp -d 127.0.0.1 --dport 7947 -j DNAT --to-destination \"\$$NEIGHBOR_IP\";
+      else
+        echo \"Warning: Could not find neighbor IP. Not applying redirect.\";
+      fi;
+      exec bash
+      "
 
 volumes:
   wine_prefix:
+

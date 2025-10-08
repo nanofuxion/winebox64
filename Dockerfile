@@ -128,6 +128,8 @@ RUN apt-get update \
     unzip \
     tar \
     xz-utils \
+    iptables \
+    iproute2 \
     mesa-vulkan-drivers \
     vulkan-tools \
     libvulkan1 \
@@ -190,9 +192,12 @@ RUN rm -f /tmp/wine-prep.sh
 
 # Install DXVK-Sarek after Wine prefix is initialized
 USER gamer
+ENV WINEPREFIX=/home/gamer/.wine64
 RUN cd /tmp && wget -O dxvk-sarek-v1.11.0.tar.gz "https://github.com/pythonlover02/DXVK-Sarek/releases/download/v1.11.0/dxvk-sarek-async-v1.11.0.tar.gz" \
  && tar -xzf dxvk-sarek-v1.11.0.tar.gz \
  && cd dxvk-sarek-async-v1.11.0 \
+ && mkdir -p /home/gamer/.wine64/drive_c/windows/system32 \
+ && mkdir -p /home/gamer/.wine64/drive_c/windows/syswow64 \
  && cp x64/* /home/gamer/.wine64/drive_c/windows/system32/ \
  && cp x32/* /home/gamer/.wine64/drive_c/windows/syswow64/ \
  && rm -rf /tmp/dxvk-sarek-async-v1.11.0 /tmp/dxvk-sarek-v1.11.0.tar.gz
@@ -205,17 +210,8 @@ RUN cd /tmp && wget -O winefiles-1.35.zip "https://github.com/Ilan12346-maya/Xin
  && cp -r winefiles/* /opt/xinput-bridge/ \
  && rm -rf /tmp/winefiles /tmp/winefiles-1.35.zip
 
-# Switch back to root for system-wide UDP proxy installation
+# Switch back to root
 USER root
-
-# Install UDP proxy for XinputBridge (system-wide)
-RUN cd /tmp && wget -O udp-proxy-1.0.1.zip "https://github.com/nanofuxion/XinputBridge/releases/download/v1.0.1/udp-proxy-package.zip" \
- && unzip udp-proxy-1.0.1.zip \
- && mkdir -p /opt/udp-proxy \
- && cp -r arm64/* /opt/udp-proxy/ \
- && chmod +x /opt/udp-proxy/udp_proxy \
- && chown -R gamer:gamer /opt/udp-proxy \
- && rm -rf /tmp/arm64 /tmp/amd64 /tmp/*.sh /tmp/*.service /tmp/udp-proxy-1.0.1.zip
 
 # Set up environment variables for gfxstream
 ENV MESA_LOADER_DRIVER_OVERRIDE=zink

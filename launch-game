@@ -63,14 +63,6 @@ else
     echo "Warning: XinputBridge not found at /opt/xinput-bridge"
 fi
 
-# Start UDP proxy for XinputBridge if available
-if [ -f "/opt/udp-proxy/udp_proxy" ]; then
-    echo "Starting UDP proxy for XinputBridge..."
-    /opt/udp-proxy/udp_proxy &
-    UDP_PROXY_PID=$!
-    echo "UDP proxy started with PID: $UDP_PROXY_PID"
-fi
-
 # Set Wine environment variables for better gaming performance
 export WINEDEBUG=-all
 export WINEDLLOVERRIDES="dinput8=n;dinput=n;xinput1_3=n;xinput1_4=n;xinput9_1_0=n"
@@ -83,12 +75,6 @@ if [[ "$GAME_EXECUTABLE" == *.exe ]]; then
 else
     # Use wine for other files
     wine "$GAME_EXECUTABLE" $GAME_ARGS
-fi
-
-# Clean up UDP proxy if it was started
-if [ ! -z "${UDP_PROXY_PID:-}" ]; then
-    echo "Stopping UDP proxy..."
-    kill $UDP_PROXY_PID 2>/dev/null || true
 fi
 
 echo "Game session ended."

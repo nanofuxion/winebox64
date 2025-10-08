@@ -1,34 +1,26 @@
 #!/bin/bash
 set -euxo pipefail
 
-# Wine preparation script for gamer user
-# This script initializes Wine prefix and installs essential packages
+export PATH=/opt/wine/bin:$PATH
+export WINEPREFIX=/home/gamer/.wine64
 
 echo "🍷 Adding Wine to PATH..."
-
-# Add Wine binary path to bashrc
 echo 'export PATH=/opt/wine/bin:$PATH' >> ~/.bashrc
 
-# Export PATH for current context
-export PATH=/opt/wine/bin:$PATH
-
 echo "🍷 Initializing Wine prefix..."
-
-# Run wineboot to create the prefix properly
 box64 wineboot --init
 
-# echo "📦 Installing winetricks packages..."
+sleep 2
 
-# # Install winetricks if not available
-# if ! command -v winetricks &> /dev/null; then
-#     echo "Installing winetricks..."
-#     wget -O /tmp/winetricks https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks
-#     chmod +x /tmp/winetricks
-#     sudo mv /tmp/winetricks /usr/local/bin/
-# fi
+box64 wine64 wineboot --init
+sleep 2
 
-# # Install essential packages
-# winetricks -q dotnet48 vcrun2019
+echo "📁 Ensuring Wine directory structure exists..."
+mkdir -p "$WINEPREFIX/drive_c/windows/system32"
+mkdir -p "$WINEPREFIX/drive_c/windows/syswow64"
+
+echo "📁 Verifying directory structure..."
+ls -la "$WINEPREFIX/drive_c/windows/"
 
 wget https://github.com/user-attachments/files/22665790/TestD3D.zip
 unzip TestD3D.zip
