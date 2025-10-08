@@ -184,19 +184,19 @@ RUN bash /tmp/install-wine.sh \
 # Install wine preparation script as gamer user
 COPY wine-prep.sh /tmp/
 USER gamer
-RUN bash /tmp/wine-prep.sh \
- && cd /tmp && wget -O dxvk-sarek-v1.11.0.tar.gz "https://github.com/pythonlover02/DXVK-Sarek/releases/download/v1.11.0/dxvk-sarek-async-v1.11.0.tar.gz" \
- && tar -xzf dxvk-sarek-v1.11.0.tar.gz \
- && mkdir -p /opt/dxvk-sarek \
- && cd dxvk-sarek-async-v1.11.0 \
- && mkdir -p /home/gamer/.wine64/drive_c/windows/system32 \
- && mkdir -p /home/gamer/.wine64/drive_c/windows/syswow64 \
- && mkdir -p /home/gamer/.wine/drive_c/windows/system32 \
- && cp x32/* /home/gamer/.wine64/drive_c/windows/system32/ \
- && cp x64/* /home/gamer/.wine64/drive_c/windows/syswow64/ \
- && rm -rf /tmp/dxvk-sarek-async-v1.11.0 /tmp/dxvk-sarek-v1.11.0.tar.gz
+RUN bash /tmp/wine-prep.sh
 USER root
 RUN rm -f /tmp/wine-prep.sh
+
+# Install DXVK-Sarek after Wine prefix is initialized
+USER gamer
+RUN cd /tmp && wget -O dxvk-sarek-v1.11.0.tar.gz "https://github.com/pythonlover02/DXVK-Sarek/releases/download/v1.11.0/dxvk-sarek-async-v1.11.0.tar.gz" \
+ && tar -xzf dxvk-sarek-v1.11.0.tar.gz \
+ && cd dxvk-sarek-async-v1.11.0 \
+ && cp x64/* /home/gamer/.wine64/drive_c/windows/system32/ \
+ && cp x32/* /home/gamer/.wine64/drive_c/windows/syswow64/ \
+ && rm -rf /tmp/dxvk-sarek-async-v1.11.0 /tmp/dxvk-sarek-v1.11.0.tar.gz
+USER root
 
 # Install XinputBridge winefiles as gamer user
 RUN cd /tmp && wget -O winefiles-1.35.zip "https://github.com/Ilan12346-maya/XinputBridge/releases/download/1.35/winefiles_1.35.zip" \
