@@ -46,12 +46,12 @@ Decide how best to ensure Vulkan and OpenGL from the host work in the Docker ins
 
 Consider installing `https://github.com/pythonlover02/DXVK-Sarek/releases/download/v1.11.0/dxvk-sarek-async-v1.11.0.tar.gz` or other versions into the wine prefix, as dxvk-sarek supports using vulkan versions below 1.3
 
-Install `https://github.com/Ilan12346-maya/XinputBridge/releases/download/1.35/winefiles_1.35.zip` to the wine prefix and `https://github.com/nanofuxion/XinputBridge/releases/download/v1.0.1/`udp-proxy-package.zip to the container image as per `https://github.com/nanofuxion/XinputBridge/blob/main/PROXY_README.md`
-
-Validate file structures in archive files to ensure they are extracted correctly, and review GitHub repo readme/md files to ensure correct usage
+Use wine-vpad network edition for gamepad support - pre-built DLLs downloaded from GitHub releases during Docker build. Gamepad connects from host via UDP on port 27015
 
 the host is an arm64 vm and it would probably be best to use a wine version with wow64 like `https://github.com/Kron4ek/Wine-Builds/releases/download/10.0/wine-10.0-amd64-wow64.tar.xz` to reduce prefix managemnt complexity between 32bit and 64bit 
 
 the current project already has a docker image that uses box64 we just need to build on that
 
 The goal is to make a Docker image that I can just start, then attach and play a game
+
+Only create end-user README files. Don't create excessive documentation unless it's specifically for a PR.

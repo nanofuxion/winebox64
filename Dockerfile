@@ -183,7 +183,19 @@ COPY install-wine.sh /tmp/
 RUN bash /tmp/install-wine.sh \
  && sudo rm -f /tmp/install-wine.sh
 
-# Install wine preparation script as gamer user
+# Install NetXI - Network XInput DLLs
+ARG NETXI_RELEASE_URL="https://github.com/nanofuxion/netxi/releases/latest/download/netxi-all.zip"
+RUN cd /tmp \
+ && wget -O netxi-all.zip "$NETXI_RELEASE_URL" \
+ && unzip -q netxi-all.zip \
+ && mkdir -p /home/gamer/.wine64/drive_c/windows/system32 \
+ && mkdir -p /home/gamer/.wine64/drive_c/windows/syswow64 \
+ && cp x64/*.dll /home/gamer/.wine64/drive_c/windows/system32/ \
+ && cp x86/*.dll /home/gamer/.wine64/drive_c/windows/syswow64/ \
+ && chown -R gamer:gamer /home/gamer/.wine64 \
+ && rm -rf netxi-all.zip x64 x86
+
+# Install wine preparation script as gamer user (will register xinput DLLs)
 COPY wine-prep.sh /tmp/
 USER gamer
 RUN bash /tmp/wine-prep.sh
@@ -201,16 +213,6 @@ RUN cd /tmp && wget -O dxvk-sarek-v1.11.0.tar.gz "https://github.com/pythonlover
  && cp x64/* /home/gamer/.wine64/drive_c/windows/system32/ \
  && cp x32/* /home/gamer/.wine64/drive_c/windows/syswow64/ \
  && rm -rf /tmp/dxvk-sarek-async-v1.11.0 /tmp/dxvk-sarek-v1.11.0.tar.gz
-USER root
-
-# Install XinputBridge winefiles as gamer user
-RUN cd /tmp && wget -O winefiles-1.35.zip "https://github.com/Ilan12346-maya/XinputBridge/releases/download/1.35/winefiles_1.35.zip" \
- && unzip winefiles-1.35.zip \
- && mkdir -p /opt/xinput-bridge \
- && cp -r winefiles/* /opt/xinput-bridge/ \
- && rm -rf /tmp/winefiles /tmp/winefiles-1.35.zip
-
-# Switch back to root
 USER root
 
 # Set up environment variables for gfxstream

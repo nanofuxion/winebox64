@@ -24,5 +24,23 @@ ls -la "$WINEPREFIX/drive_c/windows/"
 
 wget https://github.com/user-attachments/files/22665790/TestD3D.zip
 unzip TestD3D.zip
+rm TestD3D.zip
+
+echo "🎮 Setting up xinput DLL overrides..."
+if [ -f "$WINEPREFIX/drive_c/windows/system32/xinput1_1.dll" ]; then
+    box64 wine64 reg add 'HKEY_CURRENT_USER\Software\Wine\DllOverrides' /v xinput1_1 /t REG_SZ /d native /f
+fi
+if [ -f "$WINEPREFIX/drive_c/windows/system32/xinput1_2.dll" ]; then
+    box64 wine64 reg add 'HKEY_CURRENT_USER\Software\Wine\DllOverrides' /v xinput1_2 /t REG_SZ /d native /f
+fi
+if [ -f "$WINEPREFIX/drive_c/windows/system32/xinput1_3.dll" ]; then
+    box64 wine64 reg add 'HKEY_CURRENT_USER\Software\Wine\DllOverrides' /v xinput1_3 /t REG_SZ /d native /f
+fi
+if [ -f "$WINEPREFIX/drive_c/windows/system32/xinput1_4.dll" ]; then
+    box64 wine64 reg add 'HKEY_CURRENT_USER\Software\Wine\DllOverrides' /v xinput1_4 /t REG_SZ /d native /f
+fi
+if [ -f "$WINEPREFIX/drive_c/windows/system32/xinput9_1_0.dll" ]; then
+    box64 wine64 reg add 'HKEY_CURRENT_USER\Software\Wine\DllOverrides' /v xinput9_1_0 /t REG_SZ /d native /f
+fi
 
 echo "✅ Wine preparation completed!"
