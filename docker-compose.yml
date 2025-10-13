@@ -27,17 +27,17 @@ services:
       - LIBGL_KOPPER_DRI2=1
       - DISPLAY=${DISPLAY:-:0}
       - XAUTHORITY=/tmp/.X11-unix
+      - MESA_EXTENSION_OVERRIDE="-GL_ARB_framebuffer_sRGB -GL_EXT_texture_sRGB"
       
-    # This command first finds the neighbor's IP, adds a network rule to redirect the hardcoded IP, then starts the shell.
-    # It redirects UDP traffic intended for 127.0.0.1 on port 7947 to your neighbor's IP.
     command: >
       /bin/bash -c "
-      export NEIGHBOR_IP=\$$(ip neigh show | grep -E 'dev|avf_tap_fixed' | awk '{print \$$1}' | head -n 1);
+      export NEIGHBOR_IP=\$$(ip neigh show | awk '{print \$$1}' | head -n 1);
       if [ -n \"\$$NEIGHBOR_IP\" ]; then
-        echo \"Found neighbor IP: \$$NEIGHBOR_IP. Applying redirect.\";
-        iptables -t nat -A OUTPUT -p udp -d 127.0.0.1 --dport 7947 -j DNAT --to-destination \"\$$NEIGHBOR_IP\";
+        echo \"Found neighbor IP: \$$NEIGHBOR_IP. Starting UDP forwarding.\";
+        socat UDP4-RECVFROM:7947,fork UDP4-SENDTO:\$$NEIGHBOR_IP:7947 & \
+        socat UDP4-RECVFROM:7949,fork UDP4-SENDTO:\$$NEIGHBOR_IP:7949 &
       else
-        echo \"Warning: Could not find neighbor IP. Not applying redirect.\";
+        echo \"Warning: Could not find neighbor IP. Not starting UDP forwarding.\";
       fi;
       exec bash
       "

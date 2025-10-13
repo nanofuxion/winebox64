@@ -1,6 +1,6 @@
 # Winebox64 - Windows Gaming on ARM64
 
-Docker container for playing Windows games on ARM64 hosts using Box64, Wine, and gfxstream Vulkan.
+Docker container for playing Windows games on ARM64 hosts using Hangover and gfxstream Vulkan.
 
 ## Quick Start
 
@@ -30,17 +30,15 @@ pip install pygame
 
 ## What's Inside
 
-- **Box64**: x86-64 emulation on ARM64
-- **Wine 10.0 WoW64**: Windows compatibility layer
+- **Hangover 10.14**: Native ARM64 Wine implementation with x86/x64 Windows support (much faster than Box64+Wine)
 - **DXVK-Sarek**: DirectX to Vulkan translation (supports Vulkan 1.1.305)
 - **Gfxstream**: Host Vulkan/OpenGL passthrough
-- **Wine-vpad**: Network-based XInput gamepad support
+- **XinputBridge**: Network-based XInput gamepad support
 
 ## Directory Structure
 
 - `/mnt/shared` - Mount point for game files from host
 - `~/.wine64` - Wine prefix (persistent volume)
-- `/opt/wine` - Wine installation
 
 ## Requirements
 

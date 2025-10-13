@@ -1,6 +1,0 @@
-[submodule "wine-vpad"]
-	path = wine-vpad
-	url = https://github.com/nanofuxion/wine-vpad
-[submodule "netxi"]
-	path = netxi
-	url = https://github.com/nanofuxion/netxi.git

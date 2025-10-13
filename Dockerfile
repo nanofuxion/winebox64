@@ -1,37 +1,11 @@
-FROM debian:trixie-slim as build
+FROM debian:trixie-slim
 
 ENV DEBIAN_FRONTEND="noninteractive"
 
-# Install libraries needed to compile box
-RUN dpkg --add-architecture armhf \
- && apt-get update \
- && apt-get install -y --no-install-recommends --no-install-suggests \
-    sudo git wget curl cmake python3 build-essential gcc-arm-linux-gnueabihf libc6-dev-armhf-cross libc6:armhf libstdc++6:armhf ca-certificates \
- && apt-get install -y --no-install-recommends \
-    libasound2-plugins:armhf libasound2t64:armhf libc6:armhf libcups2t64:armhf libdbus-1-3:armhf libfontconfig1:armhf libfreetype6:armhf libglib2.0-0t64:armhf libglu1-mesa:armhf libgnutls30t64:armhf libgsm1:armhf libgssapi-krb5-2:armhf libgstreamer-plugins-base1.0-0:armhf libgstreamer1.0-0:armhf libjpeg62-turbo:armhf libkrb5-3:armhf libncurses6:armhf libodbc2:armhf libosmesa6:armhf libpcap0.8:armhf libpng16-16t64:armhf libpulse0:armhf libsane1:armhf libsdl2-2.0-0:armhf libtiff6:armhf libudev1:armhf libunwind8:armhf libusb-1.0-0:armhf libx11-6:armhf libxcomposite1:armhf libxcursor1:armhf libxext6:armhf libxfixes3:armhf libxi6:armhf libxinerama1:armhf libxrandr2:armhf libxrender1:armhf libxslt1.1:armhf libxxf86vm1:armhf ocl-icd-libopencl1:armhf \
- && apt-get install -y --no-install-recommends \
-    libasound2-plugins:arm64 libasound2t64:arm64 libc6:arm64 libcups2t64:arm64 libdbus-1-3:arm64 libfontconfig1:arm64 libfreetype6:arm64 libglib2.0-0t64:arm64 libglu1-mesa:arm64 libgnutls30t64:arm64 libgsm1:arm64 libgssapi-krb5-2:arm64 libgstreamer-plugins-base1.0-0:arm64 libgstreamer1.0-0:arm64 libjpeg62-turbo:arm64 libkrb5-3:arm64 libncurses6:arm64 libodbc2:arm64 libosmesa6:arm64 libpcap0.8:arm64 libpng16-16t64:arm64 libpulse0:arm64 libsane1:arm64 libsdl2-2.0-0:arm64 libtiff6:arm64 libudev1:arm64 libusb-1.0-0:arm64 libx11-6:arm64 libxcomposite1:arm64 libxcursor1:arm64 libxext6:arm64 libxfixes3:arm64 libxi6:arm64 libxinerama1:arm64 libxrandr2:arm64 libxrender1:arm64 libxslt1.1:arm64 libxxf86vm1:arm64 ocl-icd-libopencl1:arm64 
-
-WORKDIR /root
-
-# Build box64 and box32
-RUN git clone https://github.com/ptitSeb/box64 \
- && mkdir box64/build \
- && cd box64/build \
- && cmake .. -DRPI4ARM64=1 -DARM_DYNAREC=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo -D BOX32=ON -D BOX32_BINFMT=ON \
- && make -j$(nproc) \
- && make install DESTDIR=/box
-
-FROM debian:trixie-slim
-
-# Copy compiled box86 and box64 binaries
-COPY --from=build /box /
-
-# Install libraries needed to run box
-RUN dpkg --add-architecture armhf \
- && apt-get update \
+# Install basic dependencies
+RUN apt-get update \
  && apt-get install --yes --no-install-recommends \
-    wget curl libc6:armhf libstdc++6:armhf ca-certificates sudo
+    wget curl ca-certificates sudo
 
 # Install the correct i386 architecture for WoW64 support and all required Wine dependencies
 RUN dpkg --add-architecture i386 \
@@ -130,6 +104,7 @@ RUN apt-get update \
     xz-utils \
     iptables \
     iproute2 \
+    socat \
     mesa-vulkan-drivers \
     vulkan-tools \
     libvulkan1 \
@@ -174,30 +149,27 @@ RUN chmod +x /usr/local/bin/launch-game
 RUN mkdir -p /opt \
  && chown -R gamer:gamer /opt
 
-# Switch to gamer user for Wine and game-related installations
+# Install Hangover (native ARM64 Wine implementation)
+RUN cd /tmp \
+ && wget https://github.com/AndreRH/hangover/releases/download/hangover-10.14/hangover_10.14_debian13_trixie_arm64.tar \
+ && tar -xf hangover_10.14_debian13_trixie_arm64.tar \
+ && apt-get update \
+ && apt install -y ./hangover-wine_10.14~trixie_arm64.deb || true \
+ && apt install -y ./hangover-*.deb \
+ && rm -rf /tmp/hangover* \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/*
+
+# Install winetricks
+RUN wget https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks -O /usr/local/bin/winetricks \
+ && chmod +x /usr/local/bin/winetricks
+
+# Switch to gamer user for Wine prefix initialization
 USER gamer
 WORKDIR /home/gamer
 
-# Install Wine 10.0 with WOW64 support as gamer user
-COPY install-wine.sh /tmp/
-RUN bash /tmp/install-wine.sh \
- && sudo rm -f /tmp/install-wine.sh
-
-# Install NetXI - Network XInput DLLs
-ARG NETXI_RELEASE_URL="https://github.com/nanofuxion/netxi/releases/latest/download/netxi-all.zip"
-RUN cd /tmp \
- && wget -O netxi-all.zip "$NETXI_RELEASE_URL" \
- && unzip -q netxi-all.zip \
- && mkdir -p /home/gamer/.wine64/drive_c/windows/system32 \
- && mkdir -p /home/gamer/.wine64/drive_c/windows/syswow64 \
- && cp x64/*.dll /home/gamer/.wine64/drive_c/windows/system32/ \
- && cp x86/*.dll /home/gamer/.wine64/drive_c/windows/syswow64/ \
- && chown -R gamer:gamer /home/gamer/.wine64 \
- && rm -rf netxi-all.zip x64 x86
-
-# Install wine preparation script as gamer user (will register xinput DLLs)
+# Install wine preparation script as gamer user
 COPY wine-prep.sh /tmp/
-USER gamer
 RUN bash /tmp/wine-prep.sh
 USER root
 RUN rm -f /tmp/wine-prep.sh
@@ -214,6 +186,13 @@ RUN cd /tmp && wget -O dxvk-sarek-v1.11.0.tar.gz "https://github.com/pythonlover
  && cp x32/* /home/gamer/.wine64/drive_c/windows/syswow64/ \
  && rm -rf /tmp/dxvk-sarek-async-v1.11.0 /tmp/dxvk-sarek-v1.11.0.tar.gz
 USER root
+
+# Install XinputBridge winefiles as gamer user
+RUN cd /tmp && wget -O winefiles-1.35.zip "https://github.com/Ilan12346-maya/XinputBridge/releases/download/1.35/winefiles_1.35.zip" \
+ && unzip winefiles-1.35.zip \
+ && mkdir -p /opt/xinput-bridge \
+ && cp -r winefiles/* /opt/xinput-bridge/ \
+ && rm -rf /tmp/winefiles /tmp/winefiles-1.35.zip
 
 # Set up environment variables for gfxstream
 ENV MESA_LOADER_DRIVER_OVERRIDE=zink

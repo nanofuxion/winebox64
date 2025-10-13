@@ -45,6 +45,24 @@ else
     echo "Warning: DXVK-Sarek not found at /opt/dxvk-sarek"
 fi
 
+# Install XinputBridge to Wine prefix
+echo "Installing XinputBridge..."
+if [ -d "/opt/xinput-bridge" ]; then
+    # Install 64-bit XinputBridge files
+    if [ -d "/opt/xinput-bridge/64" ]; then
+        cp /opt/xinput-bridge/64/*.dll "$HOME/.wine64/drive_c/windows/system32/"
+        echo "Installed 64-bit XinputBridge files"
+    fi
+    
+    # Install 32-bit XinputBridge files
+    if [ -d "/opt/xinput-bridge/32" ]; then
+        cp /opt/xinput-bridge/32/*.dll "$HOME/.wine64/drive_c/windows/syswow64/"
+        echo "Installed 32-bit XinputBridge files"
+    fi
+else
+    echo "Warning: XinputBridge not found at /opt/xinput-bridge"
+fi
+
 # Set Wine environment variables for better gaming performance
 export WINEDEBUG=-all
 export WINEDLLOVERRIDES="dinput8=n;dinput=n;xinput1_3=n;xinput1_4=n;xinput9_1_0=n"
