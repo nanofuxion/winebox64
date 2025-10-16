@@ -40,8 +40,9 @@ services:
       
     command: >
       /bin/bash -c "
-      sudo /usr/local/bin/uhid-server-arm64 &
-      exec bash
+      sudo /usr/local/bin/uhid-server-arm64 > /tmp/uhid-server.log 2>&1 &
+      echo 'uhid-server-arm64 started with PID:' \$!
+      exec bash -i
       "
 
 volumes:
