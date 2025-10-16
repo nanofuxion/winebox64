@@ -4,9 +4,10 @@ set -euxo pipefail
 export WINEPREFIX=/home/gamer/.persist/wine64
 
 echo "🍷 Initializing Wine prefix with Hangover..."
+mkdir -p /home/gamer/.persist
 wineboot --init
 
-sleep 2ls 
+sleep 2s 
 
 wget https://github.com/user-attachments/files/22665790/TestD3D.zip
 unzip TestD3D.zip
