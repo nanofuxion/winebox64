@@ -94,7 +94,7 @@ RUN dpkg --add-architecture i386 \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
-# Install additional packages for gaming and graphics
+# Install additional packages for gaming and graphics including Wayland support
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
     cabextract \
@@ -111,6 +111,11 @@ RUN apt-get update \
     libvulkan-dev \
     mesa-utils \
     mesa-utils-extra \
+    libwayland-client0 \
+    libwayland-server0 \
+    libwayland-egl1 \
+    libwayland-cursor0 \
+    wayland-protocols \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
@@ -153,13 +158,15 @@ RUN chmod +x /usr/local/bin/uhid-server-arm64
 RUN mkdir -p /opt \
  && chown -R gamer:gamer /opt
 
-# Install Hangover (native ARM64 Wine implementation)
+# Install Hangover (native ARM64 Wine implementation) and extract DXVK
 RUN cd /tmp \
  && wget https://github.com/AndreRH/hangover/releases/download/hangover-10.14/hangover_10.14_debian13_trixie_arm64.tar \
  && tar -xf hangover_10.14_debian13_trixie_arm64.tar \
  && apt-get update \
  && apt install -y ./hangover-wine_10.14~trixie_arm64.deb || true \
  && apt install -y ./hangover-*.deb \
+ && tar -xzf dxvk-v2.7.1.tar.gz -C /opt/ \
+ && chown -R gamer:gamer /opt/dxvk-v2.7.1 \
  && rm -rf /tmp/hangover* \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
@@ -172,29 +179,22 @@ RUN wget https://raw.githubusercontent.com/Winetricks/winetricks/master/src/wine
 USER gamer
 WORKDIR /home/gamer
 
-# # Install wine preparation script as gamer user
-# COPY wine-prep.sh /tmp/
-# RUN bash /tmp/wine-prep.sh
-# USER root
-# RUN rm -f /tmp/wine-prep.sh
+# Install wine preparation script as gamer user
+COPY wine-prep.sh /tmp/
+RUN bash /tmp/wine-prep.sh
+USER root
+RUN rm -f /tmp/wine-prep.sh
 
-# # Install DXVK after Wine prefix is initialized
-# USER gamer
-# ENV WINEPREFIX=/home/gamer/.persist/wine64
-# RUN cd /tmp && wget -O dxvk-1.10.tar.gz "https://github.com/doitsujin/dxvk/releases/download/v1.10/dxvk-1.10.tar.gz" \
-#  && tar -xzf dxvk-1.10.tar.gz \
-#  && cd dxvk-1.10 \
-#  && chmod +x setup_dxvk.sh \
-#  && bash setup_dxvk.sh install
-# USER root
-
-# Set up environment variables for gfxstream
+# Set up environment variables for gfxstream with Wayland support
 ENV MESA_LOADER_DRIVER_OVERRIDE=zink
 ENV VK_ICD_FILENAMES=/usr/share/vulkan/icd.d/gfxstream_vk_icd.json
 ENV MESA_VK_WSI_DEBUG=sw,linear
 ENV XWAYLAND_NO_GLAMOR=1
 ENV LIBGL_KOPPER_DRI2=1
 ENV DISPLAY=:0
+ENV XDG_SESSION_TYPE=wayland
+ENV GDK_BACKEND=wayland
+ENV QT_QPA_PLATFORM=wayland
 ENV WINEPREFIX=/home/gamer/.persist/wine64
 
 # Set up final permissions and switch to gamer user
