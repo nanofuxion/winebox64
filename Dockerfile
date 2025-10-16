@@ -5,7 +5,7 @@ ENV DEBIAN_FRONTEND="noninteractive"
 # Install basic dependencies
 RUN apt-get update \
  && apt-get install --yes --no-install-recommends \
-    wget curl ca-certificates sudo
+    wget curl ca-certificates sudo procps
 
 # Install the correct i386 architecture for WoW64 support and all required Wine dependencies
 RUN dpkg --add-architecture i386 \
