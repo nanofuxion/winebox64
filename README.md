@@ -38,7 +38,7 @@ pip install pygame
 ## Directory Structure
 
 - `/mnt/shared` - Mount point for game files from host
-- `~/.wine64` - Wine prefix (persistent volume)
+- `~/.persist/wine64` - Wine prefix (persistent volume)
 
 ## Requirements
 

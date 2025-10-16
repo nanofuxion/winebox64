@@ -21,7 +21,7 @@ echo "Arguments: $GAME_ARGS"
 source /usr/local/bin/setup-gfxstream.sh
 
 # Initialize Wine prefix if it doesn't exist
-if [ ! -d "$HOME/.wine64" ]; then
+if [ ! -d "$HOME/.persist/wine64" ]; then
     echo "Initializing Wine prefix..."
     wine64 wineboot --init
     wine wineboot --init
@@ -32,13 +32,13 @@ echo "Installing DXVK-Sarek..."
 if [ -d "/opt/dxvk-sarek" ]; then
     # Install 64-bit DXVK files
     if [ -d "/opt/dxvk-sarek/x64" ]; then
-        cp /opt/dxvk-sarek/x64/*.dll "$HOME/.wine64/drive_c/windows/system32/"
+        cp /opt/dxvk-sarek/x64/*.dll "$HOME/.persist/wine64/drive_c/windows/system32/"
         echo "Installed 64-bit DXVK-Sarek files"
     fi
     
     # Install 32-bit DXVK files
     if [ -d "/opt/dxvk-sarek/x32" ]; then
-        cp /opt/dxvk-sarek/x32/*.dll "$HOME/.wine64/drive_c/windows/syswow64/"
+        cp /opt/dxvk-sarek/x32/*.dll "$HOME/.persist/wine64/drive_c/windows/syswow64/"
         echo "Installed 32-bit DXVK-Sarek files"
     fi
 else
@@ -50,13 +50,13 @@ echo "Installing XinputBridge..."
 if [ -d "/opt/xinput-bridge" ]; then
     # Install 64-bit XinputBridge files
     if [ -d "/opt/xinput-bridge/64" ]; then
-        cp /opt/xinput-bridge/64/*.dll "$HOME/.wine64/drive_c/windows/system32/"
+        cp /opt/xinput-bridge/64/*.dll "$HOME/.persist/wine64/drive_c/windows/system32/"
         echo "Installed 64-bit XinputBridge files"
     fi
     
     # Install 32-bit XinputBridge files
     if [ -d "/opt/xinput-bridge/32" ]; then
-        cp /opt/xinput-bridge/32/*.dll "$HOME/.wine64/drive_c/windows/syswow64/"
+        cp /opt/xinput-bridge/32/*.dll "$HOME/.persist/wine64/drive_c/windows/syswow64/"
         echo "Installed 32-bit XinputBridge files"
     fi
 else

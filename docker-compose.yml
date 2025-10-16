@@ -14,7 +14,7 @@ services:
     
     volumes:
         - /mnt/shared:/mnt/shared:rw
-        - wine_prefix:/home/gamer/.wine64
+        - wine_prefix:/home/gamer/.persist:rw
         - /tmp/.X11-unix:/tmp/.X11-unix:rw
         - /usr/lib/aarch64-linux-gnu/libvulkan_gfxstream.so:/usr/lib/aarch64-linux-gnu/libvulkan_gfxstream.so:ro # Vulkan gfxstream
         - /usr/lib/aarch64-linux-gnu/libGL.so.1:/usr/lib/aarch64-linux-gnu/libGL.so.1:ro # OpenGL Zink
@@ -28,17 +28,11 @@ services:
       - DISPLAY=${DISPLAY:-:0}
       - XAUTHORITY=/tmp/.X11-unix
       - MESA_EXTENSION_OVERRIDE="-GL_ARB_framebuffer_sRGB -GL_EXT_texture_sRGB"
+      - SDL_JOYSTICK_DEVICE=/dev/input/event4
       
     command: >
       /bin/bash -c "
-      export NEIGHBOR_IP=\$$(ip neigh show | awk '{print \$$1}' | head -n 1);
-      if [ -n \"\$$NEIGHBOR_IP\" ]; then
-        echo \"Found neighbor IP: \$$NEIGHBOR_IP. Starting UDP forwarding.\";
-        socat UDP4-RECVFROM:7947,fork UDP4-SENDTO:\$$NEIGHBOR_IP:7947 & \
-        socat UDP4-RECVFROM:7949,fork UDP4-SENDTO:\$$NEIGHBOR_IP:7949 &
-      else
-        echo \"Warning: Could not find neighbor IP. Not starting UDP forwarding.\";
-      fi;
+      sudo /usr/local/bin/uhid-server-arm64 &
       exec bash
       "
 
