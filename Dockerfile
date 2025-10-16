@@ -172,21 +172,21 @@ RUN wget https://raw.githubusercontent.com/Winetricks/winetricks/master/src/wine
 USER gamer
 WORKDIR /home/gamer
 
-# Install wine preparation script as gamer user
-COPY wine-prep.sh /tmp/
-RUN bash /tmp/wine-prep.sh
-USER root
-RUN rm -f /tmp/wine-prep.sh
+# # Install wine preparation script as gamer user
+# COPY wine-prep.sh /tmp/
+# RUN bash /tmp/wine-prep.sh
+# USER root
+# RUN rm -f /tmp/wine-prep.sh
 
-# Install DXVK-Sarek after Wine prefix is initialized
-USER gamer
-ENV WINEPREFIX=/home/gamer/.persist/wine64
-RUN cd /tmp && wget -O dxvk-1.10.tar.gz "https://github.com/doitsujin/dxvk/releases/download/v1.10/dxvk-1.10.tar.gz" \
- && tar -xzf dxvk-1.10.tar.gz \
- && cd dxvk-1.10 \
- && chmod +x setup_dxvk.sh \
- && bash setup_dxvk.sh
-USER root
+# # Install DXVK after Wine prefix is initialized
+# USER gamer
+# ENV WINEPREFIX=/home/gamer/.persist/wine64
+# RUN cd /tmp && wget -O dxvk-1.10.tar.gz "https://github.com/doitsujin/dxvk/releases/download/v1.10/dxvk-1.10.tar.gz" \
+#  && tar -xzf dxvk-1.10.tar.gz \
+#  && cd dxvk-1.10 \
+#  && chmod +x setup_dxvk.sh \
+#  && bash setup_dxvk.sh install
+# USER root
 
 # Set up environment variables for gfxstream
 ENV MESA_LOADER_DRIVER_OVERRIDE=zink
