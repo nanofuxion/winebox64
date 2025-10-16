@@ -150,10 +150,6 @@ RUN chmod +x /usr/local/bin/setup-gfxstream.sh
 COPY launch-game /usr/local/bin/
 RUN chmod +x /usr/local/bin/launch-game
 
-# Copy XinputBridge UDP proxy server
-COPY services/uhid-server-arm64 /usr/local/bin/
-RUN chmod +x /usr/local/bin/uhid-server-arm64
-
 # Create opt directory and set proper permissions for gamer user
 RUN mkdir -p /opt \
  && chown -R gamer:gamer /opt

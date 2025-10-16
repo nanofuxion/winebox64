@@ -1,0 +1,15 @@
+[Unit]
+Description=XinputBridge UHID Server for Gaming
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/uhid-server-arm64
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
+
