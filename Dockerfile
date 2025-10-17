@@ -34,6 +34,8 @@ RUN apt-get update \
     libpulse0 \
     libsane1 \
     libsdl2-2.0-0 \
+    libsdl2-tff-2.0-0 \
+    libsdl2-image-2.0-0 \
     libtiff6 \
     libudev1 \
     libusb-1.0-0 \
